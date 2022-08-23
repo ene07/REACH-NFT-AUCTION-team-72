@@ -2,7 +2,7 @@ import React from 'react';
 import Stack from '@mui/material/Stack';
 import LoadingButton from '@mui/lab/LoadingButton';
 
-export const LoadingButon = ({display}) => {
+export const LoadingButon = ({display, children}) => {
   return (
     <Stack spacing={2} direction='row' >
       {
@@ -12,10 +12,6 @@ export const LoadingButon = ({display}) => {
         sx={{ 
           mt: 3, 
           mb: 2, 
-          background: 'black',
-          "&:hover": {
-            background: 'tomato'
-          }
         }}
         variant='contained'
         loading={display}
@@ -29,16 +25,16 @@ export const LoadingButon = ({display}) => {
           sx={{ 
             mt: 3, 
             mb: 2, 
-            background: 'transparent',
+            background: 'purple',
             "&:hover": {
-              background: 'tomato'
+              background: 'grey'
             }
           }}
           loading={display}
-          variant='outlined' 
+          variant='contained' 
           // loadingIndicator='Creating your copyright ...'
         >
-          Submit
+          {children}
         </LoadingButton>
 
       }
