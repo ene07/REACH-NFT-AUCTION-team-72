@@ -1,23 +1,30 @@
 import logo from './logo.svg';
 import './App.css';
-
+import {Routes,Route} from "react-router-dom"
+import Home from './pages/Home';
+import Collection from './pages/Collections';
+import CreateNft from './pages/createNft';
+import Layout from './layout';
+import YourNft from './pages/yourNft';
+import Bid from './pages/bid';
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+         <Layout>
+         <Routes>
+      
+             <Route exact path='/' element={<Home/>}/>
+             <Route exact path='/collections' element={<Collection/>}/>
+             <Route exact path='/createnft' element={< CreateNft />}/>
+             <Route exact path='/yourNft' element={<  YourNft/>}/>
+             <Route exact path='/bid/:id' element={< Bid />}/>
+            
+          
+             
+           
+         </Routes>
+         </Layout>
+   
     </div>
   );
 }
