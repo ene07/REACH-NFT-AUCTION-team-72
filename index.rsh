@@ -19,12 +19,12 @@ export const main = Reach.App(() => {
   init();
 
   Creator.only(()=>{
-    const {nftId,minBid,lenInBlock} =declassify(interact.getSale())
+    const {nftId, minBid, lenInBlock} = declassify(interact.getSale())
 
   })
 
   Creator.publish(nftId,minBid,lenInBlock)
-  const amt =1
+  const amt = 1
   commit()
   Creator.pay([[amt,nftId]])
   Creator.interact.auctionReady()
