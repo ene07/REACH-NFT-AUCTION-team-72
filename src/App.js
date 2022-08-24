@@ -18,9 +18,6 @@ function App() {
              <Route exact path='/createnft' element={< CreateNft />}/>
              <Route exact path='/yourNft' element={<  YourNft/>}/>
              <Route exact path='/bid/:id' element={< Bid />}/>
-            
-          
-             
            
          </Routes>
          </Layout>
