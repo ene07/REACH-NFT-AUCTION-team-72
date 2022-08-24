@@ -58,7 +58,7 @@ audioNFT.current=await reach.launchToken(account,"AudioMix","AMT",{supply:1})
   },
   showOutcome:(winner,amt)=>{
     console.log(`Creator saw that ${reach.formatAddress(winner) }bid ${reach.formatCurrency(amt)}`)
-    setOutcome(`${reach.formatAddress(winner) } won bid at ${reach.formatCurrency(amt)} Algo`)
+    setOutcome(`${reach.formatAddress(winner).slice(0,9)+"..." } won bid at ${reach.formatCurrency(amt)} Algo`)
   },
   showTimeout:()=>{
     console.log("deadline")
@@ -94,8 +94,8 @@ const AddToCollection= async()=>{
    price:price,
    date:Number(Date.now()),
    available:true,
-   imgUrl:imgUrl
-  
+   imgUrl:imgUrl,
+   timeout:"Ongoing",
    });
    console.log("pushed to firebase")
    console.log(docRef)

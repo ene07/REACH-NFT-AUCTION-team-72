@@ -1,11 +1,12 @@
 import React,{useEffect,useState} from 'react'
 import Player from '../../components/player'
 import equals from "../../assests/Pictures/Ed-Sheeran-Equals.webp"
-import { collection, onSnapshot, doc,getDocs,query, orderBy, limit } from 'firebase/firestore'
+import { collection, onSnapshot, doc,getDocs,query, orderBy, limit, updateDoc,addDoc  } from 'firebase/firestore'
 import {BidderState,BidOutcomeState,TimeoutState} from '../../recoilState/globalState';
 import { db } from '../../firebase/fireabse.util'
 import { useRecoilValue } from 'recoil'
 import { Oval } from  'react-loader-spinner'
+
 
 export default function YourNft() {
   const [ArrayNft,ArraysetNft] =useState([])
@@ -31,11 +32,24 @@ export default function YourNft() {
 
     getNft()
 },[])
+
+const broadCast=async()=>{
+  try{
+      const docRef = doc(db, "Nfts", nft.id);
+      await updateDoc(docRef, {
+         available:false,
+          timeout:timeout,
+         
+        });
+  }catch(e){
+      console.log(e)
+  }
+}
   return (
     <div>
         <div className='flex px-16 py-10 space-x-6'>
             <main className='w-3/5 flex flex-col space-y-4'>
-              <Player  />
+              <Player  songName={nft.title}/>
               <main className='flex flex-col space-y-4'>
                  <h5 className='text-sm '>Title: {nft.title}</h5>
                   <h5 className='text-sm '>NFT ID: {nft.id}</h5>
@@ -44,8 +58,13 @@ export default function YourNft() {
                      <h5 className='text-lg  '>Description</h5>
                      <p className='text-xs pl-1 pr-6'>{nft.description}</p>
                   </main>
-
+                   
             </main>
+                <main className='w-full flex justify-center py-4'>
+                  {timeout==="Deadline reached"&&
+                 <button onClick={broadCast} className='px-2 py-0.5 text-white bg-blue-600 hover:bg-white hover:text-blue-600 w-1/2 flex justify-center'>Update Changes</button>
+                  }
+                 </main>
             </main>
            
            <main className="w-2/5 ">
@@ -65,8 +84,8 @@ export default function YourNft() {
                         {Bids.map((bid)=>{
                           return(
                             <div className='flex flex-col justify-center'>
-                                 <h5 className='text-sm'>{bid.address}</h5>
-                                 <h5 className='text-sm'>{bid.amount}</h5>
+                                 <h5 className='text-sm'>{bid.address.slice(0,9)+"..."}</h5>
+                                 <h5 className='text-sm px-4'>{bid.amount}</h5>
                             </div>
                           )
                         })}

@@ -27,10 +27,13 @@ export default function Bid() {
   const [hasBidded,setBidded]=useState(false)
   const  [bid,setBid]=useState("")
   const [outcome,setOutcome]=useState("")
-  const attach=(contractInfo) => {
+  const attach=async (contractInfo) => {
      
     connectedCtc.current = account.contract(backend, JSON.parse(contractInfo));
     //console.log(connectedCtc.current)
+    const nftId = await connectedCtc.current.apis.Bidder.optIn();
+    await account.tokenAccept(nftId);
+
     setHasAttach(true)
     }
 
@@ -82,7 +85,7 @@ export default function Bid() {
               <h5 className='text-lg text-slate-600 '> Song cover</h5>
                 <img src={location.state.item.imgUrl} alt="" className='w-3/4 h-36 rounded-md shadow'/>
               </main>
-               <h5 className='text-lg text-slate-600 '>Status: <span className='text-yellow-700 text-sm'>{"Ongoing"}</span></h5>
+               <h5 className='text-lg text-slate-600 '>Status: <span className='text-yellow-700 text-sm'>{location.state.item.timeout}</span></h5>
                <main className='flex px-12'>
                  <button onClick={()=>setTrigger(true)} className='py-0.5 px-2 border bg-blue-800 rounded-lg hover:bg-white hover:text-blue-800 text-white w-56'>Bid</button>
                </main>
@@ -107,7 +110,7 @@ export default function Bid() {
                              onChange={(e)=>setctcInfo(e.target.value)}
                              name="ctcInfo"
                              value={ctcInfo}
-                             className="text-white rounded-lg border"
+                             className="text-black rounded-lg border"
                            />
                           <button onClick={()=>attach(ctcInfo)} className='px-3 py-0.5 border rounded-full text-sm text-white bg-blue-600 hover:bg-white hover:text-blue-600'>Attach</button>
                         </div>
@@ -122,7 +125,7 @@ export default function Bid() {
                           <input 
                            type="text"
                             placeholder='Place your bid (Algo)'
-                            className='border h-8 text-sm outline-none rounded-lg px-6 py-4'
+                            className='border h-8  text-sm outline-none rounded-lg px-6 py-4'
                             name='bid'
                             value={bid}
                             onChange={(e)=>setBid(e.target.value)}
