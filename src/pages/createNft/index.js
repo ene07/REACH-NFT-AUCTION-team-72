@@ -197,7 +197,12 @@ export default function CreatNft({ exitCreatorView }) {
                       sx={{ 
                         mt: 3, 
                         mb: 2,
-                        background: 'purple'
+                        background: 'purple',
+                        "&:hover": {
+                          background: 'transparent',
+                          color: 'purple',
+                          fontSize: '1em'
+                        }
                       }}
                       variant='contained'
                       // loading={display}

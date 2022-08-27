@@ -22,7 +22,7 @@ function Home() {
       <Divider />
       {/* <img src={team1} alt=""  className='h-20 w-20 rounded-full'/> */}
       <div className='team flex flex-col justify-center items-center py-12 px-16'>
-        <Typography variant='h5' className='text-blue-600 font-semibold pb-4'>Team-72</Typography>
+        <Typography variant='h5' className='text-purple-600 font-semibold pb-4'>Team-72</Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} md={4} >
             <Box>
@@ -32,7 +32,7 @@ function Home() {
                   <Grid item xs={7} className='shadow-lg'>
                     <CardContent sx={{ flexGrow: 1, }} >
                       <Stack sx={{ }}>
-                        <Typography gutterBottom variant="h5" className='text-sm text-blue-800'>Frontend Developer</Typography>
+                        <Typography gutterBottom variant="h5" className='text-sm text-purple-400'>Frontend Developer</Typography>
                         <Typography variant='body' gutterBottom className='text-lg font-semibold'>{"Oliviahotakwa"}</Typography>
                         <Typography className='text-xs'>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Nemo atque minima ipsum maxime possimus error cupiditate a libero ipsa?</Typography>
                         <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, pt: 2 }}>
@@ -57,7 +57,7 @@ function Home() {
                     <Grid item xs={7}>
                       <CardContent sx={{ flexGrow: 1, }} >
                         <Stack sx={{ }}>
-                          <Typography gutterBottom variant="h5" className='text-sm text-blue-800'>Fullstack Developer</Typography>
+                          <Typography gutterBottom variant="h5" className='text-sm text-purple-400'>Fullstack Developer</Typography>
                           <Typography variant='body' gutterBottom className='text-lg font-semibold'>{"Scapula "}</Typography>
                           <Typography className='text-xs'>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Nemo atque minima ipsum maxime possimus error cupiditate a libero ipsa?</Typography>
                           <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, pt: 2 }}>
@@ -82,7 +82,7 @@ function Home() {
                 <Grid item xs={7}>
                   <CardContent sx={{ flexGrow: 1, }} >
                     <Stack sx={{ }}>
-                      <Typography gutterBottom variant="h5" className='text-sm text-blue-800'>Fullstack Developer</Typography>
+                      <Typography gutterBottom variant="h5" className='text-sm text-purple-400'>Fullstack Developer</Typography>
                       <Typography variant='body' gutterBottom className='text-lg font-semibold'>{"Bobelr#8524 "}</Typography>
                       <Typography className='text-xs'>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Nemo atque minima ipsum maxime possimus error cupiditate a libero ipsa?</Typography>
                       <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, pt: 2 }}>
@@ -131,7 +131,7 @@ export default Home;
           <img src={team1} alt=""  className='h-20 w-20 rounded-full'/>
       </main>
       <main className='flex flex-col justify-center space-y-0'>
-          <h5 className='text-sm text-blue-800'>Frontend Developer</h5>
+          <h5 className='text-sm text-purple-400'>Frontend Developer</h5>
           <h5 className='text-lg font-semibold'>{"Lorem ipsum dolor "}</h5>
           <p className='text-xs'>
             Lorem ipsum dolor sit amet,<br></br>
@@ -151,7 +151,7 @@ export default Home;
           <img src={team2} alt=""  className='h-20 w-20 rounded-full'/>
       </main>
       <main className='flex flex-col justify-center space-y-0'>
-          <h5 className='text-sm text-blue-800'>Fullstack Developer</h5>
+          <h5 className='text-sm text-purple-400'>Fullstack Developer</h5>
           <h5 className='text-lg font-semibold'>{"Lorem ipsum dolor "}</h5>
           <p className='text-xs'>
             Lorem ipsum dolor sit amet,<br></br>
@@ -171,7 +171,7 @@ export default Home;
           <img src={team3} alt=""  className='h-20 w-20 rounded-full'/>
       </main>
       <main className='flex flex-col justify-center space-y-0'>
-          <h5 className='text-sm text-blue-800'>Fullstack Developer</h5>
+          <h5 className='text-sm text-purple-400'>Fullstack Developer</h5>
           <h5 className='text-lg font-semibold'>{"Lorem ipsum dolor "}</h5>
           <p className='text-xs'>
             Lorem ipsum dolor sit amet,<br></br>
@@ -224,7 +224,7 @@ export default Home;
 //                      <img src={team1} alt=""  className='h-20 w-20 rounded-full'/>
 //                   </main>
 //                   <main className='flex flex-col justify-center space-y-0'>
-//                      <h5 className='text-sm text-blue-800'>Frontend Developer</h5>
+//                      <h5 className='text-sm text-purple-400'>Frontend Developer</h5>
 //                      <h5 className='text-lg font-semibold'>{"Lorem ipsum dolor "}</h5>
 //                      <p className='text-xs'>
 //                         Lorem ipsum dolor sit amet,<br></br>
@@ -244,7 +244,7 @@ export default Home;
 //                      <img src={team2} alt=""  className='h-20 w-20 rounded-full'/>
 //                   </main>
 //                   <main className='flex flex-col justify-center space-y-0'>
-//                      <h5 className='text-sm text-blue-800'>Fullstack Developer</h5>
+//                      <h5 className='text-sm text-purple-400'>Fullstack Developer</h5>
 //                      <h5 className='text-lg font-semibold'>{"Lorem ipsum dolor "}</h5>
 //                      <p className='text-xs'>
 //                         Lorem ipsum dolor sit amet,<br></br>
@@ -264,7 +264,7 @@ export default Home;
 //                      <img src={team3} alt=""  className='h-20 w-20 rounded-full'/>
 //                   </main>
 //                   <main className='flex flex-col justify-center space-y-0'>
-//                      <h5 className='text-sm text-blue-800'>Fullstack Developer</h5>
+//                      <h5 className='text-sm text-purple-400'>Fullstack Developer</h5>
 //                      <h5 className='text-lg font-semibold'>{"Lorem ipsum dolor "}</h5>
 //                      <p className='text-xs'>
 //                         Lorem ipsum dolor sit amet,<br></br>
