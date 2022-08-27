@@ -4,7 +4,7 @@ import { Grid, Container, Stack, Button } from '@mui/material';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
-function Common({ name, imgsrc, visit, btname }) {
+function Common({ imgsrc, visit,}) {
   return (
     // bgcolor:'background.paper', 
     <>
@@ -19,13 +19,14 @@ function Common({ name, imgsrc, visit, btname }) {
                 // color="text.primary"z\
                 gutterBottom
                 fontWeight='bold'
-                color='black'
+                color='purple'
               >
               {/* &apos; */}
               Audio NFT Marketplace
             </Typography>
-            <Typography variant="h5" align="center" sx={{color:"black"}} paragraph>
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptatum impedit porro consequuntur praesentium facilis fugiat eos cupiditate error eius soluta?
+            <Typography variant="h5" align="center" sx={{color:"black"}}>A marketplace built for your need.</Typography>
+            <Typography variant="body1" align="center" paragraph>
+              Create, share, transfer, sell and buy and monetize any form of Audio work: Music, tutorials etc with a click
             </Typography>
             <Stack
               sx={{ pt: 4 }}
@@ -42,7 +43,8 @@ function Common({ name, imgsrc, visit, btname }) {
                   color: 'black',
                   background: 'white'
                 }
-              }}>Create an auction</Button>
+              }}>
+                <NavLink to={visit}>Explore Audio Gallery</NavLink></Button>
             </Stack>
           </Container>
           </Box>

@@ -8,6 +8,8 @@ import { ALGO_MyAlgoConnect as MyAlgoConnect } from '@reach-sh/stdlib';
 import { ALGO_WalletConnect as WalletConnect } from '@reach-sh/stdlib';
 import { ALGO_PeraConnect as PeraConnect } from '@reach-sh/stdlib';
 import {useRecoilState} from "recoil"
+import Button from "@mui/material/Button";
+
 // const reach = loadStdlib('ALGO');
 const ConnectAccount= () =>{
   const [trigger,setTrigger] =useState(false)
@@ -56,21 +58,22 @@ const ConnectAccount= () =>{
   }
   return(
     <div className='connect'>
-      {address.length===0&&
-        <button className='py-1 px-4 text-sm border border-slate-400 rounded-full hover:bg-blue-600 hover:border-0 hover:text-white'
-            onClick={()=>setTrigger(true)}
-        >
-         Connect Wallet
-        </button>
-  }
+      { address.length===0&& <Button 
+        variant='contained'
+        disableElevation
+        sx={{background: 'purple', "&:hover": { transition: '0.2sec ease-in-out', background: 'white', color: 'purple', fontWeight: "bold"}}}
+        onClick={()=>setTrigger(true)}
+      >
+        Connect Wallet 
+      </Button>}
        
       {address.length>1&&
-        <button className='py-1 px-4 text-sm border border-slate-400 rounded-full hover:bg-rose-400 hover:border-0'
+        <Button variant='contained' className='py-1 px-4 text-sm border border-slate-400 rounded-full hover:bg-rose-400 hover:border-0'
             onClick={()=>setTrigger(true)}
         >
             {address.slice(0,9)+"..."}
-        </button>
-        }
+        </Button>}
+        
          <Modal trigger={trigger} cname="h-80 w-3/5 shadow rounded-lg py-4 px-4">
             <div className='connect-modal '>
                <main className='flex justify-end'>
@@ -106,9 +109,7 @@ const ConnectAccount= () =>{
                         </div>
                     </main>
                 </div>
-
             </div>
-
          </Modal>
     </div>
   )  

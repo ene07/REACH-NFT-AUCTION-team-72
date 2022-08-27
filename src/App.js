@@ -10,18 +10,15 @@ import Bid from './pages/bid';
 function App() {
   return (
     <div className="App">
-         <Layout>
-         <Routes>
-      
-             <Route exact path='/' element={<Home/>}/>
-             <Route exact path='/collections' element={<Collection/>}/>
-             <Route exact path='/createnft' element={< CreateNft />}/>
-             <Route exact path='/yourNft' element={<  YourNft/>}/>
-             <Route exact path='/bid/:id' element={< Bid />}/>
-           
-         </Routes>
-         </Layout>
-   
+      <Layout>
+      <Routes>
+        <Route exact path='/' element={<Home/>}/>
+        <Route exact path='/collections' element={<Collection/>}/>
+        <Route exact path='/createnft' element={< CreateNft />}/>
+        <Route exact path='/yourNft' element={<  YourNft/>}/>
+        <Route exact path='/bid/:id' element={< Bid />}/>
+      </Routes>
+      </Layout>
     </div>
   );
 }

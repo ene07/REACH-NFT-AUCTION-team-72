@@ -1,222 +1,257 @@
-import React,{useState,useEffect,useRef} from 'react'
-import { loadStdlib } from '@reach-sh/stdlib';
-import {AiOutlineCloseCircle} from "react-icons/ai" 
-import "./createnft.css"
-import * as backend from '../../reach-app/build/index.main.mjs'
-import { collection, setDoc,doc,getDoc,addDoc} from  'firebase/firestore'
-import { db } from '../../firebase/fireabse.util';
+import React,{useState ,useRef} from 'react'
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import CssBaseline from '@mui/material/CssBaseline';
+import TextField from '@mui/material/TextField';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import CancelRounded from '@mui/icons-material/CancelRounded';
+import Typography from '@mui/material/Typography';
+import Tooltip from '@mui/material/Tooltip';
+import Container from '@mui/material/Container';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import { NavLink } from "react-router-dom"
+import { deploy } from './deploy';
+import LoadingButton from '@mui/lab/LoadingButton';
 import { useRecoilValue,useRecoilState } from 'recoil';
 import { AccountState,BidderState,BidOutcomeState,TimeoutState} from '../../recoilState/globalState';
-import Modal from '../../components/modal';
-import {Link} from "react-router-dom"
+import ViewNftModal from '../../components/ViewNftModal';
 
+/**
+ * @Note NFTCreatorView expects a prop which is of type function.
+ *        It should contain logic that exits this page when clicked.
+ *        It should be declared in the child component where this component
+ *          is invoked.
+ * 
+ *  @dev - Perhaps { Scapula}
+ *    @notice : You can access form data very easily from the submit button
+ *                handler. That's why I console log it. 
+ */
+export default function CreatNft({ exitCreatorView }) {
+  const [formdata, setInputData] = React.useState({});
+  const [display, setdisplay] = React.useState(false);
+  const account = useRecoilValue(AccountState)
+  const [auctionReady, setready]=useState("")
+  const [bids,setBids]=useRecoilState(BidderState)
+  const [outcome,setoutcome]=useRecoilState(BidOutcomeState)
+  const [timeOut,settimeOut]=useRecoilState(TimeoutState)
+  const [ctcInfo,setctcinfo] =useState("")
+  const [arrayctcInfo,setarrayctcInfo]=useState([])
+  const [deadline, setdeadline]=useState("")
+  const [trigger,settrigger] = useState(false);
+  const [errorMsg,seterrorMsg]=useState("")
+  const [showView, setview] = useState(false)
+  const audioNFT = useRef();
 
-const reach = loadStdlib('ALGO');
-
-export default function CreateNft() {
-
-
-  const account =useRecoilValue(AccountState)
-  const [auctionReady,setReady]=useState("")
-  const [Bids,setBids]=useRecoilState(BidderState)
-  const [Outcome,setOutcome]=useRecoilState(BidOutcomeState)
-  const [timeOut,setTimeOut]=useRecoilState(TimeoutState)
-  const [ctcInfo,setCtcInfo] =useState("")
-  const [ArrayctcInfo,setArrayctcInfo]=useState([])
-  const [deadline,setDeadline]=useState("")
-  const [title,setTitle]=useState("")
-  const [description,setDescription]=useState("")
-  const [trigger,setTrigger] =useState(false)
-  const [price,setPrice]=useState("")
-  const [ErrorMsg,setErrorMsg]=useState("")
-  const [imgUrl,setUrl]=useState("")
-  const [showView,setView]=useState(false)
-  const audioNFT= useRef();
-  const deployContract = async () => {
-    console.log("deploying")
-
-audioNFT.current=await reach.launchToken(account,"AudioMix","AMT",{supply:1})
-  const deployerInteract = {
-    getSale: () => ({
-      nftId:audioNFT.current.id,
-      minBid:reach.parseCurrency(Number(price)),
-      lenInBlock:Number(deadline)
-      
-    }),
-    auctionReady:()=>{
-      setReady("Auction is open")
-   },
-
-   showBid:(who,amt)=>{
-    console.log(`Creator saw that ${reach.formatAddress(who) }bid ${reach.formatCurrency(amt)}`)
-    const bids =[]
-    bids.push({
-      address:reach.formatAddress(who),
-      amount:reach.formatCurrency(amt)
-    })
-    setBids(bids)
-  },
-  showOutcome:(winner,amt)=>{
-    console.log(`Creator saw that ${reach.formatAddress(winner) }bid ${reach.formatCurrency(amt)}`)
-    setOutcome(`${reach.formatAddress(winner).slice(0,9)+"..." } won bid at ${reach.formatCurrency(amt)} Algo`)
-  },
-  showTimeout:()=>{
-    console.log("deadline")
-    setTimeOut("Deadline reached")
- },
-
-
-
-    }
-setTrigger(true)
-try{
-const contract = account.contract(backend);
-backend.Creator(contract, deployerInteract);
-  const cInfo = await contract.getInfo();
-  setArrayctcInfo([JSON.stringify(cInfo,null,2)])
-  setCtcInfo(JSON.stringify(cInfo,null,2))
-
+  const setDisplay = (value) => setdisplay(value);
   
-}catch(e){
-console.log(e)
-setErrorMsg(e.message)
-}
-}
+  const setReady = (value) => setready(value);
 
-const AddToCollection= async()=>{
-  console.log("pushing to firebase")
-  setTrigger(false)
- const docRef = await addDoc(collection(db, "Nfts"), {
-  // nftId:audioNFT.current.id,
-  title:title,
-  description:description,
-  ctcInfo:ctcInfo,
-   price:price,
-   date:Number(Date.now()),
-   available:true,
-   imgUrl:imgUrl,
-   timeout:"Ongoing",
-   });
-   console.log("pushed to firebase")
-   console.log(docRef)
- 
-    
-   setView(true)
-setDeadline("")
-setTitle("")
-setDescription("")
+  const setctcInfo = (value) => setctcinfo(value);
 
-setPrice("")
+  const setOutcome = (value) => setoutcome(value);
+  
+  const setTimeOut = (value) => settimeOut(value);
+  
+  const setArrayctcInfo = (value) => setarrayctcInfo(value);
+  
+  const setDeadline = (value) => setdeadline(value);
 
+  const setTrigger = (value) => settrigger(value);
+  
+  const setErrorMsg = (value) => seterrorMsg(value);
+  
+  const clearInputData = (value) => setInputData(value);
 
-}
-console.log(ctcInfo,account,"accccccc")
-console.log(auctionReady)
+  const setView = (value) => setview(value);
+
+  const handleClose = () => settrigger(false);
+
+  const { deployContract, addToCollection } = deploy;
+  
+  const setIData = (value) => setInputData(value);
+
+  const handleSubmission = (event) => {
+    setDisplay(true);
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const iData = {
+      title: data.get('title'),
+      price: data.get('price'),
+      imgUrl: data.get('imgUrl'),
+      deadline: data.get('deadline'),
+      description: data.get('description'),
+    }
+    setIData(iData);
+
+    console.log(formdata);
+    deployContract({
+      options: {
+        audioNFT: audioNFT, 
+        setReady: setReady, 
+        auctionReady: auctionReady, 
+        setBids: setBids, 
+        setOutcome: setOutcome, 
+        setTimeOut: setTimeOut, 
+        deadline: deadline,
+        setTrigger: setTrigger,
+        setErrorMsg: setErrorMsg,
+        setArrayctcInfo: setArrayctcInfo,
+        clearInputData: clearInputData,
+        setctcInfo: setctcInfo
+      }});
+  };
+  // console.log(formdata);
+
   return (
-   <div>
-        <div className='py-20'>
-          <div className='flex flex-col space-y-6 '>
-            <main className='flex justify-center'>
-              <div className='bg-slate-100 flex justify-center h-16 w-16 p-2 items-center rounded-md shadow-lg'>
-               <div className='hover:bg-slate-400 rounded-full p-1 '>
-                 <Link to="/collections"> <AiOutlineCloseCircle  className='text-2xl text-slate-700 hover:text-white'/></Link>
-               </div>
-               </div>
-            </main>
-             <main className='flex justify-center'>
-                <h5 className='text-2xl '>Create an Auction</h5>
-             </main>
-            <main className='flex flex-col items-center justify-center space-y-4'>
-              <div className='grid grid-flow-row grid-cols-2 gap-x-8 gap-y-4 w-1/2'>
-                 <input  
-                   placeholder='Title*'
-                   className='border h-16  py-3 px-4 rounded-lg shadow'
-                   type="text"
-                   name="title"
-                   value={title}
-                   onChange={(e)=>setTitle(e.target.value)}
-                 />
-                 <input
-                    placeholder='Minimum bid*'
-                    className='border h-16 py-3 px-4 rounded-lg shadow'
-                    type="text"
-                    name="price"
-                    value={price}
-                    onChange={(e)=>setPrice(e.target.value)}
-                 />
-                 <input 
-                   placeholder='Deadline*'
-                  className='border h-16 py-3 px-4 rounded-lg shadow'
-                  type="text"
-                  name="deadline"
-                  value={deadline}
-                  onChange={(e)=>setDeadline(e.target.value)}
-                 />
-                 <input 
-                   placeholder='Image Url*'
-                   className='border h-16 py-3 px-4 rounded-lg shadow'
-                   type="text"
-                   name="deadline"
-                   value={imgUrl}
-                   onChange={(e)=>setUrl(e.target.value)}
-                 />
-              </div>
-              <div className='flex justify-center rounded-lg shadow w-1/2'>
-                <textarea
-                  placeholder='Description*'
-                  className='border  w-full h-16 rounded-md shadow py-2 px-4 '
-                  type="text"
-                  name="description"
-                  value={description}
-                  onChange={(e)=>setDescription(e.target.value)}
-                 
-                />
-              </div>
-            </main>
-            <main className='flex flex-col items-center justify-center space-y-4'>
-               <div className='flex space-x-4'>
-               <input type="checkbox" className='border'/>
-               <label> I confirm all information are correct</label>
-               </div>
-               <div>
-                {showView===false&&
-                   <button className='py-1 text-sm hover:bg-slate-300 hover:text-white px-6 border w-72 rounded-md'
-                   onClick={deployContract}
-                  >Deploy NFT</button>
+    <Container component="main" maxWidth="sm" sx={{ py: 8 }} >
+      <Grid container spacing={2}>
+        <Grid item>
+          <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column',  }}>
+            <CardContent sx={{ flexGrow: 1 }}>
+            <CssBaseline />
+              <Box  sx={{marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center',}}>
+                <Tooltip title='Cancel' sx={{cursor: 'pointer'}}>
+                  <NavLink to='/' onClick={ exitCreatorView } sx={{cursor: 'pointer'}}>
+                    <Avatar sx={{m: 1, background: 'purple', "&:hover": {background: 'purple'}}}>
+                      <CancelRounded />
+                    </Avatar>
+                  </NavLink>
+                </Tooltip>
+                <Typography component="h1" variant="h5">
+                  Create an Auction
+                </Typography>
+                <Box component="form" noValidate={false} onSubmit={handleSubmission} sx={{ mt: 3 }}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        autoComplete="given-name"
+                        name="title"
+                        required
+                        fullWidth
+                        id="title"
+                        label="Title"
+                        autoFocus
+                        // onChange={(e) => {e.preventDefault(); tempFormData.title = e.currentTarget; }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        type='number'
+                        id="price"
+                        label="Price"
+                        name="price"
+                        autoComplete="price"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        type='text'
+                        id="deadline"
+                        label="Deadline"
+                        name="deadline"
+                        autoComplete="Deadline"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        type='text'
+                        id="imgUrl"
+                        label="Image Url"
+                        name="imgUrl"
+                        autoComplete="Image-Url"
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        required
+                        fullWidth
+                        name="description"
+                        label="Description"
+                        type="text"
+                        id="description"
+                        autoComplete="new-description"
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <FormControlLabel
+                        control={<Checkbox value="confirmCorrectness" color="primary" />}
+                        label="I confirm all information is correct."
+                      />
+                    </Grid>
+                  </Grid>
+                  { 
+                    !display ? <Button 
+                      // display={display} 
+                      type="submit"
+                      fullWidth
+                      sx={{ 
+                        mt: 3, 
+                        mb: 2,
+                        background: 'purple'
+                      }}
+                      variant='contained'
+                      // loading={display}
+                      
+                    >{'Create Audio'}</Button> : <LoadingButton 
+                      fullWidth
+                      sx={{ 
+                        mt: 3, 
+                        mb: 2, 
+                        background: 'grey',
+                      }}
+                    loading
+                    variant='contained' 
+                    // loadingIndicator='Creating your copyright ...'
+                  >
+                    Creating your copyright ...
+                  </LoadingButton>
                 }
-                 {showView===true&&
-                 <Link to="/yournft">
-                  <button className='py-1 text-sm hover:bg-slate-300 hover:text-white px-6 border w-72 rounded-md'
-                  >View NFT</button>
-                  </Link>
-                 }
-                  
-               </div>
-            </main>
-          </div>
-       
-          
-
-        </div>
-
-        <Modal trigger={trigger} cname="h-72 w-1/2 shadow rounded-lg py-4 px-4">
-           <div className='modal-div '>
-                <main className='flex justify-end'>
-                 <button onClick={()=>setTrigger(false)}><AiOutlineCloseCircle className="text-md" /></button>
-                </main>
-
-                 <div  className='flex flex-col justify-center items-center space-y-4'>
-                    <h5>Contract information</h5>
-                    
-                       <h5>{ArrayctcInfo[0]}</h5>
-                       <h5>{ErrorMsg}</h5>
-                      <h5>{auctionReady}</h5>
-                      <button className='rounded-full hover:text-black py-0.5 px-3 text-sm border hover:bg-white'
-                       onClick={AddToCollection}
-                      >ok</button>
-                 </div>
-            </div>
-           </Modal>
-   </div>
-  )
+                  {showView? <NavLink to='/yournft'><Button variant='contained' sx={{width: '100%', background: 'teal'}}>View NFT</Button></NavLink> : null}
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+         <ViewNftModal
+            trigger={trigger}
+            handleClose={handleClose}
+            formdata={formdata}
+            arrayctcInfo={arrayctcInfo}
+            setView={setView}
+            setDeadline={setDeadline}
+            auctionReady={auctionReady}
+            account={account}
+            cteInfo={ctcInfo}
+            errorMsg={errorMsg}
+            addToCollection={addToCollection}
+         />
+        </Grid>
+    </Grid>
+    {/* /* <Copyright sx={{ mt: 5 }} /> */}
+  </Container>
+  );
 }
+
+
+
+// function Copyright(props) {
+//   return (
+//     <Typography variant="body2" color="text.secondary" align="center" {...props}>
+//       {'Copyright © '}
+//       <Link color="inherit" href="https://somelink.com/">
+//         Website
+//       </Link>{' '}
+//       {new Date().getFullYear()}
+//       {'.'}
+//     </Typography>
+//   );
+// }
