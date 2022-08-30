@@ -16,7 +16,8 @@ export const main = Reach.App(() => {
     // Specify Bob's interact interface here
     bid:Fun([UInt],Tuple(Address,UInt)),
      optIn: Fun([], Token),
-     seelastBid:Fun([],UInt)
+     seelastBid:Fun([],UInt),
+      showHighestBidder:Fun([],Address)
   });
   init();
 
@@ -75,6 +76,8 @@ export const main = Reach.App(() => {
       transfer(lastPrice).to(Creator)
     }
     Creator.interact.showOutcome(highestBidder,lastPrice)
+       const [ [], k ] = call(Bidder.showHighestBidder);
+      k(highestBidder);
     commit()
     exit()
 });
