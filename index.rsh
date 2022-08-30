@@ -14,7 +14,9 @@ export const main = Reach.App(() => {
   });
   const Bidder= API('Bidder', {
     // Specify Bob's interact interface here
-    bid:Fun([UInt],Tuple(Address,UInt))
+    bid:Fun([UInt],Tuple(Address,UInt)),
+     optIn: Fun([], Token),
+     seelastBid:Fun([],UInt)
   });
   init();
 
@@ -40,6 +42,13 @@ export const main = Reach.App(() => {
     .api_(Bidder.optIn, () => {      
       return [0, (k) => {
         k(nftId);
+        
+        return [highestBidder,lastPrice,isFirstBid];
+      }];
+    })
+    .api_(Bidder.seelastBid, () => {      
+      return [0, (k) => {
+        k(lastPrice);
         
         return [highestBidder,lastPrice,isFirstBid];
       }];
