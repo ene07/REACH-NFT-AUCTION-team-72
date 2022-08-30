@@ -37,6 +37,13 @@ export const main = Reach.App(() => {
     .invariant(balance(nftId) == amt)
     .invariant(balance() == (isFirstBid? 0:lastPrice))
     .while(lastConsensusTime() <= end)
+    .api_(Bidder.optIn, () => {      
+      return [0, (k) => {
+        k(nftId);
+        
+        return [highestBidder,lastPrice,isFirstBid];
+      }];
+    })
     .api_(Bidder.bid, (bid) => {
        check(bid >lastPrice,"bid is too low")
       return[bid,(notify) =>{
