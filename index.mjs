@@ -32,7 +32,14 @@ const startBidders=async()=>{
   console.log(`${who} decides to bid ${stdlib.formatCurrency(bid)}`)
   console.log(`${who} decides to before is ${await getBal()}`)
   try{
+        const owner = await ctc.v.NFT.owner();
+       console.log(`${who} saw who the creator is ${stdlib.formatAddress(owner[1])}`);
+
+      const prevBid= await ctc.apis.Bidder.seelastBid()
+      console.log(`${who} saw last bid at ${prevBid}`)
+    
       const lastBid= await ctc.apis.Bidder.seelastBid()
+      
       console.log(`${who} saw last bid at ${lastBid}`)
     const [lastBidder,lastBid] = await ctc.apis.Bidder.bid(bid)
      console.log(`${who} out bid ${lastBidder} who bid ${stdlib.formatCurrency(lastBid)}`) 
@@ -50,38 +57,6 @@ const startBidders=async()=>{
     await stdlib.wait(1)
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 const ctcCreator=accCreator.contract(backend)
 await ctcCreator.p.Creator({
