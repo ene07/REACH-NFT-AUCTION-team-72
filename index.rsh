@@ -3,6 +3,7 @@
 'reach 0.1';
 
 export const main = Reach.App(() => {
+   setOptions({ untrustworthyMaps: true })
   const Creator = Participant('Creator', {
      getSale:Fun([],Object({
       nftId:Token,
