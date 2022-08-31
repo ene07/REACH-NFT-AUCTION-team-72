@@ -32,6 +32,8 @@ const startBidders=async()=>{
   console.log(`${who} decides to bid ${stdlib.formatCurrency(bid)}`)
   console.log(`${who} decides to before is ${await getBal()}`)
   try{
+      const lastBid= await ctc.apis.Bidder.seelastBid()
+      console.log(`${who} saw last bid at ${lastBid}`)
     const [lastBidder,lastBid] = await ctc.apis.Bidder.bid(bid)
      console.log(`${who} out bid ${lastBidder} who bid ${stdlib.formatCurrency(lastBid)}`) 
   }catch(e){
