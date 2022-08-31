@@ -1,9 +1,11 @@
 
 
+
+
 'reach 0.1';
 
 export const main = Reach.App(() => {
-   setOptions({ untrustworthyMaps: true })
+  setOptions({ untrustworthyMaps: true })
   const Creator = Participant('Creator', {
      getSale:Fun([],Object({
       nftId:Token,
@@ -20,7 +22,7 @@ export const main = Reach.App(() => {
     bid:Fun([UInt],Tuple(Address,UInt)),
     optIn: Fun([], Token),
     seelastBid:Fun([],UInt),
-    showHighestBidder:Fun([],Address)
+    showHighestBidder:Fun([],Tuple(Address,UInt))
   });
   
   const vNFT = View('NFT', {
@@ -92,7 +94,7 @@ export const main = Reach.App(() => {
     commit()
     Creator.interact.showOutcome(highestBidder,lastPrice)
        const [ [], k ] = call(Bidder.showHighestBidder);
-      k(highestBidder);
+      k([highestBidder,lastPrice]);
     commit()
     exit()
 });
