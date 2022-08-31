@@ -2,20 +2,21 @@
 
 
 
+
 'reach 0.1';
 
 export const main = Reach.App(() => {
   setOptions({ untrustworthyMaps: true })
-  const Creator = Participant('Creator', {
-     getSale:Fun([],Object({
+  const Auctioneer= Participant('Auctioneer', {
+     getAuction:Fun([],Object({
       nftId:Token,
-      minBid:UInt,
+      startingBid:UInt,
       lenInBlock:UInt
 
      })),
-     auctionReady:Fun([],Null),
-     showBid:Fun([Address,UInt],Null),
-     showOutcome:Fun([Address,UInt],Null)
+     startBidding:Fun([],Null),
+     seeBid:Fun([Address,UInt],Null),
+     seeOutcome:Fun([Address,UInt],Null)
   });
   const Bidder= API('Bidder', {
     // Specify Bob's interact interface here
@@ -29,28 +30,28 @@ export const main = Reach.App(() => {
         owner: Address });
   init();
 
-  Creator.only(()=>{
-    const {nftId,minBid,lenInBlock} =declassify(interact.getSale())
+  Auctioneer.only(()=>{
+    const {nftId,startingBid,lenInBlock} =declassify(interact.getAuction())
 
   })
 
-  Creator.publish(nftId,minBid,lenInBlock)
+  Auctioneer.publish(nftId,startingBid,lenInBlock)
 
-   vNFT.owner.set(Creator); 
+   vNFT.owner.set(Auctioneer); 
 
-  const amt =1
+  const price =1
   commit()
-  Creator.pay([[amt,nftId]])
-  Creator.interact.auctionReady()
-  assert(balance(nftId)==amt,"Balance of Nft is wrong")
+  Auctioneer.pay([[price,nftId]])
+  Auctioneer.interact.startBidding()
+  assert(balance(nftId)==price,"Balance of Nft is wrong")
 
   const end=lastConsensusTime() +lenInBlock
 
   const bidders =new Set()
 
   const [highestBidder,lastPrice,isFirstBid]
-    =parallelReduce([ Creator,minBid,true ])
-    .invariant(balance(nftId) == amt)
+    =parallelReduce([ Auctioneer,startingBid,true ])
+    .invariant(balance(nftId) == price)
     .invariant(balance() == (isFirstBid? 0:lastPrice))
     .while(lastConsensusTime() <= end)
 
@@ -78,21 +79,21 @@ export const main = Reach.App(() => {
         }
         const who=this
         bidders.insert(who)
-        Creator.interact.showBid(who,bid)
+        Auctioneer.interact.seeBid(who,bid)
         return[who,bid,false]
       }]
     })
     .timeout(absoluteTime(end), () => {
-        Creator.publish();
+        Auctioneer.publish();
       
         return [highestBidder,lastPrice,isFirstBid]
     });
-    transfer(amt,nftId).to(highestBidder)
+    transfer(price,nftId).to(highestBidder)
     if(!isFirstBid){
-      transfer(lastPrice).to(Creator)
+      transfer(lastPrice).to(Auctioneer)
     }
     commit()
-    Creator.interact.showOutcome(highestBidder,lastPrice)
+    Auctioneer.interact.seeOutcome(highestBidder,lastPrice)
        const [ [], k ] = call(Bidder.showHighestBidder);
       k([highestBidder,lastPrice]);
     commit()
