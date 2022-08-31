@@ -79,6 +79,7 @@ export const main = Reach.App(() => {
     if(!isFirstBid){
       transfer(lastPrice).to(Creator)
     }
+       commit()
     Creator.interact.showOutcome(highestBidder,lastPrice)
        const [ [], k ] = call(Bidder.showHighestBidder);
       k(highestBidder);
