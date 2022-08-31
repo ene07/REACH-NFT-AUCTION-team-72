@@ -19,6 +19,9 @@ export const main = Reach.App(() => {
      seelastBid:Fun([],UInt),
       showHighestBidder:Fun([],Address)
   });
+  
+  const vNFT = View('NFT', {
+        owner: Address });
   init();
 
   Creator.only(()=>{
@@ -27,6 +30,7 @@ export const main = Reach.App(() => {
   })
 
   Creator.publish(nftId,minBid,lenInBlock)
+   vNFT.owner.set(Creator); 
   const amt =1
   commit()
   Creator.pay([[amt,nftId]])
