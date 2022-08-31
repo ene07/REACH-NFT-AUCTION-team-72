@@ -1,3 +1,5 @@
+
+
 'reach 0.1';
 
 export const main = Reach.App(() => {
@@ -15,9 +17,9 @@ export const main = Reach.App(() => {
   const Bidder= API('Bidder', {
     // Specify Bob's interact interface here
     bid:Fun([UInt],Tuple(Address,UInt)),
-     optIn: Fun([], Token),
-     seelastBid:Fun([],UInt),
-      showHighestBidder:Fun([],Address)
+    optIn: Fun([], Token),
+    seelastBid:Fun([],UInt),
+    showHighestBidder:Fun([],Address)
   });
   
   const vNFT = View('NFT', {
@@ -30,7 +32,9 @@ export const main = Reach.App(() => {
   })
 
   Creator.publish(nftId,minBid,lenInBlock)
+
    vNFT.owner.set(Creator); 
+
   const amt =1
   commit()
   Creator.pay([[amt,nftId]])
@@ -39,11 +43,14 @@ export const main = Reach.App(() => {
 
   const end=lastConsensusTime() +lenInBlock
 
+  const bidders =new Set()
+
   const [highestBidder,lastPrice,isFirstBid]
     =parallelReduce([ Creator,minBid,true ])
     .invariant(balance(nftId) == amt)
     .invariant(balance() == (isFirstBid? 0:lastPrice))
     .while(lastConsensusTime() <= end)
+
     .api_(Bidder.optIn, () => {      
       return [0, (k) => {
         k(nftId);
@@ -60,12 +67,14 @@ export const main = Reach.App(() => {
     })
     .api_(Bidder.bid, (bid) => {
        check(bid >lastPrice,"bid is too low")
+       check(!bidders.member(this),"You already placed a bid")
       return[bid,(notify) =>{
         notify([highestBidder, lastPrice])
         if(!isFirstBid){
           transfer(lastPrice).to(highestBidder)
         }
         const who=this
+        bidders.insert(who)
         Creator.interact.showBid(who,bid)
         return[who,bid,false]
       }]
@@ -79,7 +88,7 @@ export const main = Reach.App(() => {
     if(!isFirstBid){
       transfer(lastPrice).to(Creator)
     }
-       commit()
+    commit()
     Creator.interact.showOutcome(highestBidder,lastPrice)
        const [ [], k ] = call(Bidder.showHighestBidder);
       k(highestBidder);
