@@ -4,23 +4,23 @@ import * as backend from './build/index.main.mjs';
 const stdlib = loadStdlib();
 const startingBalance = stdlib.parseCurrency(100);
 
-console.log(`Creating test account for Creator`);
-const accCreator = await stdlib.newTestAccount(startingBalance);
+console.log(`Creating test account for Auctiooner`);
+const accAuctioneer = await stdlib.newTestAccount(startingBalance);
 
-console.log(`Having creator create testing NFT`);
-const theNFT = await stdlib.launchToken(accCreator, "Audio Mix Tape" ,"AMT", {supply:1});
+console.log(`Having auctioneer create testing NFT`);
+const theNFT = await stdlib.launchToken(accAuctioneer, "Audio Mix Tape" ,"AMT", {supply:1});
 const nftId = theNFT.id;
-const minBid = stdlib.parseCurrency(2);
+const startingBid = stdlib.parseCurrency(2);
 const lenInBlock= 10;
 const params = { 
   nftId,
-  minBid,
+  startingBid,
   lenInBlock};
 
 let done = false;
 const bidders = [];
-const startBidders = async () => {
-    let bid = minBid;
+const startAuction= async () => {
+    let bid = startingBid;
     const runBidder = async (who) => {
         const inc = stdlib.parseCurrency(Math.random() * 10);
         bid = bid.add(inc);
@@ -29,7 +29,7 @@ const startBidders = async () => {
         acc.setDebugLabel(who);
         await acc.tokenAccept(nftId);
         bidders.push({who, acc});
-        const ctc = acc.contract(backend, ctcCreator.getInfo());
+        const ctc = acc.contract(backend, ctcAuctioneer.getInfo());
         const getBal = async () => stdlib.formatCurrency(await stdlib.balanceOf(acc));
 
         console.log(`${who} decides to bid ${stdlib.formatCurrency(bid)}.`);
@@ -48,9 +48,9 @@ const startBidders = async () => {
         console.log(`${who} balance after is ${await getBal()}`);
     };
 
-    await runBidder('Alice');
-    await runBidder('Bob');
-    await runBidder('Claire');
+    await runBidder('Jon');
+    await runBidder('Gabe');
+    await runBidder('Conny');
     while ( ! done ) {
         await stdlib.wait(1);
     }
@@ -59,7 +59,7 @@ const startBidders = async () => {
   bidders.map(async(bid)=>{
     const acc =bid.acc
     const who=bid.who
-     const ctc = acc.contract(backend, ctcCreator.getInfo());
+     const ctc = acc.contract(backend, ctcAuctioneer.getInfo());
      acc.tokenAccept(nftId)
      try {
       const  [highestBidder,lastPrice]= await ctc.apis.Bidder.showHighestBidder()
@@ -72,20 +72,20 @@ const startBidders = async () => {
  })
 }
 
-const ctcCreator = accCreator.contract(backend);
-await ctcCreator.participants.Creator({
-    getSale: () => {
-        console.log(`Creator sets parameters of sale:`, params);
+const ctcAuctioneer = accAuctioneer.contract(backend);
+await ctcAuctioneer.participants.Auctioneer({
+    getAuction: () => {
+        console.log(`Auctioneer sets parameters of sale:`, params);
         return params;
     },
-    auctionReady: () => {
-        startBidders();
+    startBidding: () => {
+        startAuction();
     },
-    showBid: (who, amt) => {
-        console.log(`Creator saw that ${stdlib.formatAddress(who)} bid ${stdlib.formatCurrency(amt)}.`);
+    seeBid: (who, amt) => {
+        console.log(`Auctioneer saw that ${stdlib.formatAddress(who)} bid ${stdlib.formatCurrency(amt)}.`);
     },
-    showOutcome: (winner, amt) => {
-        console.log(`Creator saw that ${stdlib.formatAddress(winner)} won with ${stdlib.formatCurrency(amt)}`);
+    seeOutcome: (winner, amt) => {
+        console.log(`Auctioneer saw that ${stdlib.formatAddress(winner)} won with ${stdlib.formatCurrency(amt)}`);
         biddersSeeOutcome()
     },
 });
@@ -98,8 +98,8 @@ await ctcCreator.participants.Creator({
 (async()=>{
   
   bidders.map(async(bid)=>{
-    const [ amt, amtNFT ] = await stdlib.balancesOf(bid.acc, [null, nftId]);
-        console.log(`${bid.who} has ${stdlib.formatCurrency(amt)} ${stdlib.standardUnit} and ${amtNFT} of the NFT`);
+    const [ price, priceNFT ] = await stdlib.balancesOf(bid.acc, [null, nftId]);
+        console.log(`${bid.who} has ${stdlib.formatCurrency(price)} ${stdlib.standardUnit} and ${priceNFT} of the NFT`);
      
   })
 })()
