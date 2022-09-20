@@ -1,111 +1,134 @@
-import {loadStdlib} from '@reach-sh/stdlib';
+import { loadStdlib } from '@reach-sh/stdlib';
 import * as backend from './build/index.main.mjs';
-const stdlib = loadStdlib(process.env);
-
+const stdlib = loadStdlib();
 const startingBalance = stdlib.parseCurrency(100);
 
-const accCreator=await stdlib.newTestAccount(startingBalance)
-console.log("creating nft")
+console.log(`Creating test account for Auctiooner`);
+const accAuctioneer = await stdlib.newTestAccount(startingBalance);
 
-const audioNFT=await stdlib.launchToken(accCreator,"AudioMix","AMT",{supply:1})
-const nftId =audioNFT.id 
-const minBid =stdlib.parseCurrency(2);
-const lenInBlock =10
-const  params={nftId,minBid,lenInBlock}
+console.log(` Auctioneer minting testing NFT`);
 
-let done=false
-const bidders=[]
-const startBidders=async()=>{
-  let bid=minBid
+const AudioNFT = await stdlib.launchToken(accAuctioneer, "Audio Mix Tape" ,"AMT", {supply:1});
+const nftId =AudioNFT.id;
+const deadline= 20;
 
-  const runBidder=async(who)=>{
-    const inc =stdlib.parseCurrency(Math.random()*10)
-    bid=bid.add(inc)
+const props = { 
+  nftId,
+  deadline};
 
-    const acc=await stdlib.newTestAccount(startingBalance)
-    acc.setDebugLabel(who)
-    await acc.tokenAccept(nftId)
-    bidders.push([who,acc])
-    const ctc=acc.contract(backend,ctcCreator.getInfo())
-  const getBal =async()=stdlib.formatCurrency(await stdlib.balanceOf(acc))
+let done = false;
+const buyers = [];
+const startAuction= async () => {
+  const createBuyers = async (who) => {
+    const bid= stdlib.parseCurrency(Math.random() * 10);
+    const acc = await stdlib.newTestAccount(startingBalance);
+    acc.setDebugLabel(who);
+    await acc.tokenAccept(nftId);
+    buyers.push({who, acc});
+    const ctc = acc.contract(backend, ctcAuctioneer.getInfo());
+    const getBal = async () => stdlib.formatCurrency(await stdlib.balanceOf(acc));
+    console.log(`${who} bids ${stdlib.formatCurrency(bid)} Algo`);
+    console.log(`${who} balance before is ${await getBal()} Algo`);
 
-  console.log(`${who} decides to bid ${stdlib.formatCurrency(bid)}`)
-  console.log(`${who} decides to before is ${await getBal()}`)
-  try{
-    const [lastBidder,lastBid] = await ctc.apis.Bidder.bid(bid)
-     console.log(`${who} out bid ${lastBidder} who bid ${stdlib.formatCurrency(lastBid)}`) 
-  }catch(e){
-    console.log("Auction is over")
-  }
-  console.log(`${who} decides to after is ${await getBal()}`)
-  }
-
-  await runBidder("Alice")
-  await runBidder("Bob")
-  await runBidder("Claire")
-
-  while(!done){
-    await stdlib.wait(1)
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const ctcCreator=accCreator.contract(backend)
-await ctcCreator.p.Creator({
-
-  getSale:()=>{
-    console.log("set sale params")
-
-    return params
-  },
-
-  auctionReady:()=>{
-    startBidders();
-  },
-
-  seeBid:(who,amt)=>{
-    console.log(`Creator saw that ${stdlib.formatAddress(who) }bid ${stdlib.formatCurrency(amt)}`)
-  },
-  showOutcome:(winner,amt)=>{
-    console.log(`Creator saw that ${stdlib.formatAddress(winner) }bid ${stdlib.formatCurrency(amt)}`)
+    try {
+      const owner = await ctc.v.NFT.owner();
+       console.log(`${who} saw who the creator :${stdlib.formatAddress(owner[1])}`);
+       const hasBidded = await ctc.apis.Buyer.submitBid(bid);
+       const word= hasBidded==true? "has bidded " :"has not bidded"
+      console.log(`${who} ${word} :${bid} Algo`);
+    } catch (e) {
+        console.log(e)
+        console.log(`${who} failed to bid, because the auction is over`);
+    }
+      console.log(`${who} balance after is ${await getBal()} Algo`);
+   };
+  await createBuyers('Jon');
+  await createBuyers('Gabe');
+  await createBuyers('Conny');
+   while ( ! done ) {
+    await stdlib.wait(1);
+   }
 
   }
-})
 
-for (const [who,acc] of bidders){
-  const [amt,amtNFT]=await stdlib.balanceOf(acc,[null,nftId])
-  console.log(`${who} has ${stdlib.formatCurrency(amt)} ${stdlib.standardUnit} and ${amtNFT}`)
-}
+  const buyerSeeOutcome=async()=>{
+    buyers.map(async(bid)=>{
+      const acc =bid.acc
+      const who=bid.who
+       const ctc = acc.contract(backend, ctcAuctioneer.getInfo());
+       acc.tokenAccept(nftId)
+       try {
+        const  [winner,price]= await ctc.apis.Buyer.showHighestBidder()
+        console.log(`${who} saw ${winner} won the bid at ${stdlib.formatCurrency(price)} Algo`)
+    
+       
+      } catch (error) {
+        //console.log(error)
+        console.log("Something went wrong")
+      }
+   })
+  }
 
- done =true
+  const claimAuctionItem=()=>{ 
+    buyers.map(async(bid)=>{
+      const acc =bid.acc
+      const who=bid.who
+       const ctc = acc.contract(backend, ctcAuctioneer.getInfo());
+       acc.tokenAccept(nftId)
+       try {
+        const  value= await ctc.apis.Buyer.claimItem()
+        const word =value===true ?"you won the bid" :"you lose the bid"
+        console.log(`${who} :${word}`)
+    
+       
+      } catch (error) {
+       // console.log(error)
+        console.log("You re not eligible to claim item")
+      }
+   })
+
+  }
+
+const ctcAuctioneer = accAuctioneer.contract(backend);
+
+await ctcAuctioneer.participants.Auctioneer({
+  ...stdlib.hasConsoleLogger ,
+  ...stdlib.hasRandom,
+  getAuctionProps: () => {
+        console.log(`Auctioneer sets props for:`, props);
+        return props;
+    },
+    getBids: () => {
+       console.log("Auction is open, place your bids")
+        startAuction();
+    },
+    seeBid: (who, amt) => {
+        console.log(`Auctioneer saw that ${stdlib.formatAddress(who)} bid ${stdlib.formatCurrency(amt)}.`);
+    },
+    showTimeout:()=>{
+       console.log("Deadline is reached,Auction is closed")
+    },
+    winnerReady:()=>{
+      console.log("Sorting for winner")
+      claimAuctionItem()
+    },
+    claimTimeout:()=>{
+      console.log("Claim window is closed, Nft is transferred back to Auctioneer")
+    },
+    seeWinner: (winner, amt) => {
+        console.log(`Auctioneer saw that ${stdlib.formatAddress(winner)} won with ${stdlib.formatCurrency(amt)}`);
+        buyerSeeOutcome()
+    },
+
+});
+
+
+(async()=>{
+  
+  buyers.map(async(bid)=>{
+    const [ price, priceNFT ] = await stdlib.balancesOf(bid.acc, [null, nftId]);
+        console.log(`${bid.who} has ${stdlib.formatCurrency(price)} ${stdlib.standardUnit} and ${priceNFT} of the NFT`);
+     
+  })
+})()
+done = true;
