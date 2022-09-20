@@ -1,3 +1,8 @@
+
+
+
+
+
 'reach 0.1';
   ///FIRST_PRICED SEALED AUCTION MECHENISM
 
@@ -22,108 +27,99 @@ const AuctioneerInteract = {
 
 export const main = Reach.App(() => {
   setOptions({ untrustworthyMaps: true })
-  const Auctioneer= Participant('Auctioneer',  AuctioneerInteract);
+  const Auctioneer= Participant('Auctioneer', {
+     getAuction:Fun([],Object({
+      nftId:Token,
+      startingBid:UInt,
+      lenInBlock:UInt
 
-
-  const Buyer= API('Buyer', {
+     })),
+     startBidding:Fun([],Null),
+     seeBid:Fun([Address,UInt],Null),
+     seeOutcome:Fun([Address,UInt],Null)
+  });
+  const Bidder= API('Bidder', {
     // Specify Bob's interact interface here
-    submitBid:Fun([UInt],Bool),
-    claimItem:Fun([],Bool),
+    bid:Fun([UInt],Tuple(Address,UInt)),
     optIn: Fun([], Token),
+    seelastBid:Fun([],UInt),
     showHighestBidder:Fun([],Tuple(Address,UInt))
   });
-
+  
   const vNFT = View('NFT', {
-    owner: Address });
+        owner: Address });
   init();
 
+  Auctioneer.only(()=>{
+    const {nftId,startingBid,lenInBlock} =declassify(interact.getAuction())
 
   Auctioneer.only(() => {
     const { nftId, deadline} = declassify(interact.getAuctionProps());
   })
 
-  Auctioneer.publish( nftId, deadline);
-  vNFT.owner.set(Auctioneer); 
-  const supply = 1;
-  commit();
+  Auctioneer.publish(nftId,startingBid,lenInBlock)
+
+   vNFT.owner.set(Auctioneer); 
+
+  const price =1
+  commit()
+  Auctioneer.pay([[price,nftId]])
+  Auctioneer.interact.startBidding()
+  assert(balance(nftId)==price,"Balance of Nft is wrong")
 
   Auctioneer.pay([[supply , nftId]]);
   assert(balance(nftId) == supply, "balance of NFT is wrong");
   Auctioneer.interact.getBids();
 
-  
-  const buyersMap = new Map(Address, UInt);
-  const buyersSet= new Set();
-  //const [ timeRemaining, keepGoing ] = makeDeadline(deadline);
-  const close= lastConsensusTime() + deadline
-  const [numOfBuyer] =
-  parallelReduce([0])
-      .invariant(balance(nftId) == supply)
-      .while(lastConsensusTime() <= close)
-      .api_(Buyer.optIn, () => {      
-        return [0, (k) => {
-          k(nftId);
-          
-          return [numOfBuyer];
-        }];
-      })
-      .api_(Buyer.submitBid, (bid) => {
-        check(!buyersSet.member(this),"You already submitted your bid")
-          return [bid, (k) => {
-             k(true)
-             buyersMap[this] = bid
-             buyersSet.insert(this);
-             Auctioneer.interact.seeBid(this,bid)
-             return[numOfBuyer+1]
-          }]
+  const bidders =new Set()
 
-      })
-      .timeout(absoluteTime(close), () => {
-          Anybody.publish();
-           Auctioneer.interact.showTimeout()
-          return[numOfBuyer]
-      });
+  const [highestBidder,lastPrice,isFirstBid]
+    =parallelReduce([ Auctioneer,startingBid,true ])
+    .invariant(balance(nftId) == price)
+    .invariant(balance() == (isFirstBid? 0:lastPrice))
+    .while(lastConsensusTime() <= end)
 
-      Auctioneer.interact.winnerReady();
-      const end= lastConsensusTime() + deadline
-      const [lastBid,who,count] =
-     parallelReduce([0,Auctioneer,0])
-      .invariant(balance(nftId) == supply)
-      //.invariant(buyersSet.Map.size() == numOfBuyer)
-      //.while(count <=numOfBuyer)
-      .while(lastConsensusTime() <= end)
-      .api_(Buyer.claimItem, () => {
-        check(buyersSet.member(this),"You are not eligible to claim item")
-          return [0, (k) => {
-            const bid = fromSome(buyersMap[this],0)
-            //check(bid > highestBid, "bid is too low");
-
-            const address = bid > lastBid ? this : Auctioneer
-             const highestbid =bid >lastBid? bid :lastBid
-             if(balance() >= bid){
-              transfer(bid).to(this)
-             }
-            // transfer(bid).to(this)
-             const value=bid >lastBid ?true :false
-             k(value)
-
-             
-             return[highestbid,address,count+1]
-          }]
-
-      })
-      .timeout(absoluteTime(end), () => {
-        Anybody.publish();
-         Auctioneer.interact.claimTimeout()
-        return[lastBid,who,count]
+    .api_(Bidder.optIn, () => {      
+      return [0, (k) => {
+        k(nftId);
+        
+        return [highestBidder,lastPrice,isFirstBid];
+      }];
+    })
+    .api_(Bidder.seelastBid, () => {      
+      return [0, (k) => {
+        k(lastPrice);
+        
+        return [highestBidder,lastPrice,isFirstBid];
+      }];
+    })
+    .api_(Bidder.bid, (bid) => {
+       check(bid >lastPrice,"bid is too low")
+       check(!bidders.member(this),"You already placed a bid")
+      return[bid,(notify) =>{
+        notify([highestBidder, lastPrice])
+        if(!isFirstBid){
+          transfer(lastPrice).to(highestBidder)
+        }
+        const who=this
+        bidders.insert(who)
+        Auctioneer.interact.seeBid(who,bid)
+        return[who,bid,false]
+      }]
+    })
+    .timeout(absoluteTime(end), () => {
+        Auctioneer.publish();
+      
+        return [highestBidder,lastPrice,isFirstBid]
     });
-      transfer(supply, nftId).to(who);
-      transfer(balance()).to(Auctioneer)
-      commit()
-      // write your program here
-       Auctioneer.interact.seeWinner(who,lastBid );
-       const [ [], k ] = call(Buyer.showHighestBidder);
-         k([who,lastBid]);
-  commit();
-  exit();
+    transfer(price,nftId).to(highestBidder)
+    if(!isFirstBid){
+      transfer(lastPrice).to(Auctioneer)
+    }
+    commit()
+    Auctioneer.interact.seeOutcome(highestBidder,lastPrice)
+       const [ [], k ] = call(Bidder.showHighestBidder);
+      k([highestBidder,lastPrice]);
+    commit()
+    exit()
 });
