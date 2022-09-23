@@ -1,4 +1,4 @@
-# Detailed workshop walkthrough: Reach NFT AUCTION
+# REACH-NFT-AUCTION Workshop: Detailed walkthrough
 
 The Reach NFT auction is a web3 project developed as part of Umoja3 Decentralzed Bounty hack. This workshop is a detailed walkthrough of the application.
 
