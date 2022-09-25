@@ -418,3 +418,191 @@ Our contract is complete and functional, we can then write the frontend.
 Since we'll be interacting with an API to allow bidding, using a web frontend library is a better choice. In our case it will be React.
 
 Stop! Insert interact calls to the frontend into the program.
+
+
+
+
+````
+            import React,{useState} from 'react'
+            import Modal from "../modal"
+            import {AiOutlineCloseCircle} from "react-icons/ai"
+            import { AccountState } from '../../recoilState/globalState';
+            import { loadStdlib } from '@reach-sh/stdlib';
+            import { ALGO_MyAlgoConnect as MyAlgoConnect } from '@reach-sh/stdlib';
+
+            import { ALGO_WalletConnect as WalletConnect } from '@reach-sh/stdlib';
+            import { ALGO_PeraConnect as PeraConnect } from '@reach-sh/stdlib';
+            import {useRecoilState} from "recoil"
+            // const reach = loadStdlib('ALGO');
+            const ConnectAccount= () =>{
+              const [trigger,setTrigger] =useState(false)
+              const [account,setAccount] =useRecoilState( AccountState)
+              const [address,setAddress] =useState("")
+
+              const useMyAlgo=async(secret, mnemonic = false)=>{
+                delete window.algorand;
+                const reach = loadStdlib('ALGO');
+                 reach.setWalletFallback(reach.walletFallback( { providerEnv: 'TestNet', MyAlgoConnect } ));
+                 try {
+                  const account = mnemonic ? await reach.newAccountFromMnemonic(secret) : await reach.getDefaultAccount();
+                   console.log(account.getAddress(),"acc>>>")
+                   setAccount(account)
+                   setAddress(account.getAddress())
+                } catch (error) {
+
+                }
+              }
+              const usePera=async(secret, mnemonic = false)=>{
+                delete window.algorand;
+                const reach = loadStdlib('ALGO');
+                 reach.setWalletFallback(reach.walletFallback( { providerEnv: 'TestNet', PeraConnect } ));
+
+                 try {
+                  const account = mnemonic ? await reach.newAccountFromMnemonic(secret) : await reach.getDefaultAccount();
+                  console.log(account.getAddress(),"acc>>>")
+                  setAccount(account)
+                  setAddress(account.getAddress())
+                } catch (error) {
+
+                }
+              }
+              const useWalletConnect=async(secret, mnemonic = false)=>{
+                delete window.algorand;
+                const reach = loadStdlib('ALGO');
+                 reach.setWalletFallback(reach.walletFallback( { providerEnv: 'TestNet',  WalletConnect } ));
+                 try {
+                  const account = mnemonic ? await reach.newAccountFromMnemonic(secret) : await reach.getDefaultAccount();
+                  console.log(account.getAddress(),"acc>>>")
+                  setAccount(account)
+                  setAddress(account.getAddress())
+                } catch (error) {
+                  console.log(error)
+                }
+              }
+              
+              
+                  function CreateNft() {
+
+
+                       const account =useRecoilValue(AccountState)
+                      const [auctionReady,setReady]=useState("")
+                      const [Bids,setBids]=useRecoilState(BidderState)
+                      const [Outcome,setOutcome]=useRecoilState(BidOutcomeState)
+                      const [timeOut,setTimeOut]=useRecoilState(TimeoutState)
+                      const [ctcInfo,setCtcInfo] =useState("")
+                      const [ArrayctcInfo,setArrayctcInfo]=useState([])
+                      const [deadline,setDeadline]=useState("")
+                      const [title,setTitle]=useState("")
+                      const [description,setDescription]=useState("")
+                      const [trigger,setTrigger] =useState(false)
+                      const [price,setPrice]=useState("")
+                      const [ErrorMsg,setErrorMsg]=useState("")
+                      const [imgUrl,setUrl]=useState("")
+                      const [showView,setView]=useState(false)
+                      const audioNFT= useRef();
+                      const deployContract = async () => {
+                        console.log("deploying")
+
+                    audioNFT.current=await reach.launchToken(account,"AudioMix","AMT",{supply:1})
+                      const deployerInteract = {
+                        getSale: () => ({
+                          nftId:audioNFT.current.id,
+                          minBid:reach.parseCurrency(Number(price)),
+                          lenInBlock:Number(deadline)
+
+                        }),
+                        auctionReady:()=>{
+                          setReady("Auction is open")
+                       },
+
+                       showBid:(who,amt)=>{
+                        console.log(`Creator saw that ${reach.formatAddress(who) }bid ${reach.formatCurrency(amt)}`)
+                        const bids =[]
+                        bids.push({
+                          address:reach.formatAddress(who),
+                          amount:reach.formatCurrency(amt)
+                        })
+                        setBids(bids)
+                      },
+                      showOutcome:(winner,amt)=>{
+                        console.log(`Creator saw that ${reach.formatAddress(winner) }bid ${reach.formatCurrency(amt)}`)
+                        setOutcome(`${reach.formatAddress(winner).slice(0,9)+"..." } won bid at ${reach.formatCurrency(amt)} Algo`)
+                      },
+                      showTimeout:()=>{
+                        console.log("deadline")
+                        setTimeOut("Deadline reached")
+                     },
+
+
+
+                        }
+                    setTrigger(true)
+                    try{
+                    const contract = account.contract(backend);
+                    backend.Creator(contract, deployerInteract);
+                      const cInfo = await contract.getInfo();
+                      setArrayctcInfo([JSON.stringify(cInfo,null,2)])
+                      setCtcInfo(JSON.stringify(cInfo,null,2))
+
+
+                    }catch(e){
+                    console.log(e)
+                    setErrorMsg(e.message)
+                    }
+                    }
+
+
+        function Bid() {
+
+          const location =useLocation()
+          const [locationState,setlocationState] = useState(location.state)
+
+          const connectedCtc = useRef();
+
+          const [trigger,setTrigger] =useState(false)
+          const account =useRecoilValue(AccountState)
+          const [ctcInfo,setctcInfo]=useState({})
+          const [hasAttach,setHasAttach] =useState(false)
+          const [hasBidded,setBidded]=useState(false)
+          const  [bid,setBid]=useState("")
+          const [outcome,setOutcome]=useState("")
+          const attach=async (contractInfo) => {
+
+            connectedCtc.current = account.contract(backend, JSON.parse(contractInfo));
+            //console.log(connectedCtc.current)
+            const nftId = await connectedCtc.current.apis.Bidder.optIn();
+            await account.tokenAccept(nftId);
+
+            setHasAttach(true)
+            }
+
+            const submit=async()=>{
+              try{
+                const [lastBidder,lastBid] = await  connectedCtc.current.apis.Bidder.bid(reach.parseCurrency(Number(bid)))
+                console.log(lastBid,lastBidder,"eafhaebh")
+                if(bid >lastBid){
+                  setOutcome(`You out bid ${lastBidder} who bidded ${reach.formatCurrency(Number(lastBid))}`)
+                }else{
+                  setOutcome(`You bid was less than last bid,${reach.formatCurrency(Number(lastBid))} Algo`)
+                }
+
+              }catch(e){
+                 console.log(e)
+              }
+
+              setBidded(true)
+
+            }
+
+
+````
+
+Provided that you have a basic understanding of javascript, you can easily understand the logic of the game.
+
+## Discussion
+
+Congratulation for implimenting your own unique numbers game in reach.
+
+Please take into consideration that this workshop gives you the overview functionality with respect to code structure of our project.To best and fully understand the code please review the github repo [github repo](https://github.com/ene07/REACH-NFT-AUCTION-team-72)
+
+If you found this workshop helpful, please let us know on the [Discord community](https://discord.com/invite/AZsgcXu)
