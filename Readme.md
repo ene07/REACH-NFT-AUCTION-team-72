@@ -381,31 +381,36 @@ The winner is given a window to claim is nft item , when the time passes without
  ```
 
  Our code has some number of checks in it to ensure our application runs correctlyy as intended
-
- ```
-  check(!buyersSet.member(this),"You already submitted your bid")
- ```
  
- The check above ensure bidders are not placing bids more than once
 
  ````
-   check(buyersSet.member(this),"You are not eligible to claim item")
+   check(!buyersSet.member(this),"You already submitted your bid")
+ 
+ ````
+ 
+ 
+The check above ensure bidders are not placing bids more than once.
 
- ```
+````
+  check(buyersSet.member(this),"You are not eligible to claim item")
+ 
+````
 
- The above check ,ensures bidder trying to claim the NFT item are valid members of the list or map.
+The above check ,ensures bidder trying to claim the NFT item are valid members of the list or map.
 
 
  ### Possible code additions
+ 
+  An improvement to our code base  is to enforce a way to show winner and their bids to all our voters. For that, we will define a function thus:
 
- An improvement to our code base  is to enforce a way to show winner and their bids to all our voters. For that, we will define a function thus:
 
- ``` 
-     const [ [], k ] = call(Buyer.showHighestBidder);
+````
+  const [ [], k ] = call(Buyer.showHighestBidder);
          k([who,lastBid]);
 
- ```
-
+````
+ 
+ 
 ###  Interaction Introduction
 
 Our contract is complete and functional, we can then write the frontend.
@@ -413,12 +418,3 @@ Our contract is complete and functional, we can then write the frontend.
 Since we'll be interacting with an API to allow bidding, using a web frontend library is a better choice. In our case it will be React.
 
 Stop! Insert interact calls to the frontend into the program.
-
-```
-
-
-
-
-```
-
-
